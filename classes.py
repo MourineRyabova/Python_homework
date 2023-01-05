@@ -2,22 +2,22 @@ from pydantic import BaseModel
 from datetime import datetime
 
 class Item(BaseModel):
-    index: int
+    id: int
     name: str
     price: int
 
 class Store(BaseModel):
-    index: int
+    id: int
     address: str
 
 class Sales(BaseModel):
-    index: int
+    id: int
     sale_time: datetime
     item_id: int
     store_id: int
 
 class SalesIn(BaseModel):
-    index: int
+    id: int
     sale_time: datetime
     item_id: int
     store_id: int
