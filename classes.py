@@ -17,7 +17,6 @@ class Sales(BaseModel):
     store_id: int
 
 class SalesIn(BaseModel):
-    #id: int
     sale_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     item_id: int
     store_id: int
