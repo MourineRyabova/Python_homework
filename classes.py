@@ -17,15 +17,16 @@ class Sales(BaseModel):
     store_id: int
 
 class SalesIn(BaseModel):
-    id: int
-    sale_time: datetime
+    #id: int
+    sale_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     item_id: int
     store_id: int
 
 class TopStores(BaseModel):
+    period: str
     store_id: int
     address: str
-    revenue: int
+    month_revenue: int
 
 class TopItems(BaseModel):
     item_id: int

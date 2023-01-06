@@ -49,6 +49,8 @@ def create_sales_table():
     sales['store_id'] = store_ids
     sales.reset_index(inplace=True)
     sales = sales.rename(columns = {'index':'id'})
+    #sales['sale_time'] = pd.to_datetime(sales['sale_time'], unit='D')
+    sales = sales.sort_values(by = 'sale_time')
     return sales
 
 if __name__ == '__main__':

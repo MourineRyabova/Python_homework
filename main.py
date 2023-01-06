@@ -1,12 +1,11 @@
 import sqlite3
 import databases
-import pandas as pd
-from pd_tables_create import create_stores_table, create_items_table, create_sales_table
 from contextlib import closing
 from fastapi import FastAPI
 from typing import List
-
-from classes import Item, Store, Sales, SalesIn, TopStores, TopItems 
+from pd_tables_create import create_stores_table, create_items_table, create_sales_table
+from classes import Item, Store, Sales, SalesIn, TopStores, TopItems
+from datetime import datetime
 
 def dict_factory(cursor, row):
     """Row factory для представления результатов в виде словаря."""
@@ -47,19 +46,27 @@ async def shutdown():
 
 @app.get("/items/", response_model=List[Item])
 async def get_items():
-    query = '''SELECT * FROM toys.item LIMIT 5'''
+    query = '''SELECT * FROM item'''
     return await database.fetch_all(query)
 
 @app.get("/stores/", response_model=List[Store])
 async def get_stores():
-    query = '''SELECT * FROM store LIMIT 5'''
+    query = '''SELECT * FROM store'''
     return await database.fetch_all(query)
 
-"""@app.post("/sales/", response_model=Sales)
+@app.get("/sales/", response_model=List[Sales])
+async def get_sales():
+    query = '''SELECT * FROM sales'''
+    return await database.fetch_all(query)
+
+@app.post("/sales/") #, response_model=SalesIn)
 async def create_sale(sale: SalesIn):
-    query = sales.insert().values(sale_time=datetime.now(), item_id=sale.item_id, store_id=sale.store_id)
-    last_record_id = await database.execute(query)
-    return {**sale.dict(), "id": last_record_id}"""
+    query = '''INSERT INTO sales (sale_time, item_id, store_id) VALUES (:sale_time, :item_id, :store_id)'''
+    params = {'sale_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'item_id':sale.item_id, 'store_id':sale.store_id}
+    last_record_id = await database.execute(query, params)
+    #sales.insert().values(sale_time=datetime.now(), item_id=sale.item_id, store_id=sale.store_id)  
+    return {**sale.dict(), "id": last_record_id}
+
 
 @app.get("/items/top_10", response_model=List[TopItems])
 async def get_top_items():
@@ -76,5 +83,31 @@ async def get_top_items():
 
 @app.get("/stores/top_10", response_model=List[TopStores])
 async def get_top_stores():
-    query = ''''''
+    query = '''WITH revenue AS
+                (SELECT  DISTINCT strftime('%Y-%m', sale_time) AS period,
+                        store_id,
+                        address,
+                        SUM(i.price) AS month_revenue,
+                        ROW_NUMBER() OVER (
+                        PARTITION BY strftime('%Y-%m', sale_time)
+                        ORDER BY SUM(i.price) DESC) AS rnk
+                FROM sales s
+                INNER JOIN item i ON s.item_id = i.id
+                INNER JOIN store st ON s.store_id = st.id
+                GROUP BY strftime('%Y-%m', sale_time), address)
+
+                SELECT period, store_id, address, month_revenue
+                FROM revenue
+                WHERE rnk <= 10'''
     return await database.fetch_all(query)
+
+
+"""client = TestClient(app)
+
+def test_sales_append():
+    response = client.post(
+        "/sales/",
+        json={"id": 0, "sale_time": "2023-01-06T16:15:01.078Z", "item_id": 0, "store_id":0}
+    )
+    assert response.status_code == 200
+    assert response.json() == {"id": 0, "sale_time": "2023-01-06T16:15:01.078Z", "item_id": 0, "store_id":0}"""
