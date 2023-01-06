@@ -52,6 +52,3 @@ def create_sales_table():
     #sales['sale_time'] = pd.to_datetime(sales['sale_time'], unit='D')
     sales = sales.sort_values(by = 'sale_time')
     return sales
-
-if __name__ == '__main__':
-    create_stores_table()
