@@ -82,6 +82,7 @@ async def get_top_items():
 
 @app.get("/stores/top_10", response_model=List[TopStores])
 async def get_top_stores():
+    #Топ 10 магазинов-лидеров продаж за каждый месяц каждого года рассматриваемого периода
     query = '''WITH revenue AS
                 (SELECT  DISTINCT strftime('%Y-%m', sale_time) AS period,
                         store_id,
