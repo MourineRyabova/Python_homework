@@ -63,8 +63,7 @@ async def get_sales():
 async def create_sale(sale: SalesIn):
     query = '''INSERT INTO sales (sale_time, item_id, store_id) VALUES (:sale_time, :item_id, :store_id)'''
     params = {'sale_time': datetime.now().strftime("%Y-%m-%d %H:%M:%S"), 'item_id':sale.item_id, 'store_id':sale.store_id}
-    last_record_id = await database.execute(query, params)
-    #sales.insert().values(sale_time=datetime.now(), item_id=sale.item_id, store_id=sale.store_id)  
+    last_record_id = await database.execute(query, params)  
     return {**sale.dict(), "id": last_record_id}
 
 
@@ -100,14 +99,3 @@ async def get_top_stores():
                 FROM revenue
                 WHERE rnk <= 10'''
     return await database.fetch_all(query)
-
-
-"""client = TestClient(app)
-
-def test_sales_append():
-    response = client.post(
-        "/sales/",
-        json={"id": 0, "sale_time": "2023-01-06T16:15:01.078Z", "item_id": 0, "store_id":0}
-    )
-    assert response.status_code == 200
-    assert response.json() == {"id": 0, "sale_time": "2023-01-06T16:15:01.078Z", "item_id": 0, "store_id":0}"""
